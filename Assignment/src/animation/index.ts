@@ -1,0 +1,6 @@
+export { generateDeleteTrace } from './generateDeleteTrace'
+export { generateInsertTrace } from './generateInsertTrace'
+export { generateSearchTrace } from './generateSearchTrace'
+export { generateTraversalTrace } from './generateTraversalTrace'
+export { resetStepCounter } from './stepFactory'
+export type { OperationKind, PlaybackStatus, TraceStep, TraceStepKind } from './traceTypes'
