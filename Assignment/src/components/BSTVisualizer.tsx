@@ -1,32 +1,64 @@
+import { useEffect, useRef, useState } from 'react'
 import { Canvas } from './Canvas'
 import { Controls } from './Controls'
 import { TracePanel } from './TracePanel'
 import { useBSTVisualizer } from '../hooks/useBSTVisualizer'
 
-const CANVAS_WIDTH = 920
-const CANVAS_HEIGHT = 520
+const INITIAL_WIDTH = 920
+const INITIAL_HEIGHT = 620
 
 export function BSTVisualizer() {
+  const stageRef = useRef<HTMLDivElement | null>(null)
+  const [traceOpen, setTraceOpen] = useState(false)
+  const [canvasSize, setCanvasSize] = useState({
+    width: INITIAL_WIDTH,
+    height: INITIAL_HEIGHT,
+  })
+
+  useEffect(() => {
+    const stage = stageRef.current
+    if (!stage) {
+      return
+    }
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0]
+      if (!entry) {
+        return
+      }
+
+      const nextWidth = Math.max(360, Math.floor(entry.contentRect.width - 16))
+      const nextHeight = Math.max(320, Math.floor(entry.contentRect.height - 16))
+
+      setCanvasSize((previous) => {
+        if (previous.width === nextWidth && previous.height === nextHeight) {
+          return previous
+        }
+
+        return {
+          width: nextWidth,
+          height: nextHeight,
+        }
+      })
+    })
+
+    observer.observe(stage)
+    return () => observer.disconnect()
+  }, [])
+
   const visualizer = useBSTVisualizer({
-    width: CANVAS_WIDTH,
-    height: CANVAS_HEIGHT,
+    width: canvasSize.width,
+    height: canvasSize.height,
     initialSpeedMs: 640,
   })
 
   return (
     <main className="visualizer-page">
-      <section className="hero-shell">
-        <h1 className="hero-title">Binary Search Tree Visualizer</h1>
-        <p className="hero-subtitle">
-          Step through insert, delete, search, and traversals with a dedicated animation trace layer.
-        </p>
-      </section>
-
       <section className="visualizer-layout">
-        <div className="main-column">
+        <div className="canvas-pane" ref={stageRef}>
           <Canvas
-            width={CANVAS_WIDTH}
-            height={CANVAS_HEIGHT}
+            width={canvasSize.width}
+            height={canvasSize.height}
             nodes={visualizer.layout.nodes}
             edges={visualizer.layout.edges}
             positions={visualizer.layout.positions}
@@ -35,6 +67,15 @@ export function BSTVisualizer() {
             currentKind={visualizer.currentKind}
           />
 
+          <TracePanel
+            steps={visualizer.steps}
+            currentStep={visualizer.currentStep}
+            isOpen={traceOpen}
+            onClose={() => setTraceOpen(false)}
+          />
+        </div>
+
+        <aside className="controls-pane">
           <Controls
             status={visualizer.status}
             speedMs={visualizer.speedMs}
@@ -54,10 +95,10 @@ export function BSTVisualizer() {
             onStepBackward={visualizer.stepBackward}
             onResetPlayback={visualizer.resetPlayback}
             onScrubStep={visualizer.jumpToStep}
+            isTraceOpen={traceOpen}
+            onToggleTrace={() => setTraceOpen((previous) => !previous)}
           />
-        </div>
-
-        <TracePanel steps={visualizer.steps} currentStep={visualizer.currentStep} />
+        </aside>
       </section>
     </main>
   )

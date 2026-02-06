@@ -20,6 +20,8 @@ interface ControlsProps {
   onStepBackward: () => void
   onResetPlayback: () => void
   onScrubStep: (index: number) => void
+  isTraceOpen: boolean
+  onToggleTrace: () => void
 }
 
 function asInt(value: string): number | null {
@@ -46,6 +48,8 @@ export function Controls({
   onStepBackward,
   onResetPlayback,
   onScrubStep,
+  isTraceOpen,
+  onToggleTrace,
 }: ControlsProps) {
   const [inputValue, setInputValue] = useState('')
 
@@ -66,11 +70,16 @@ export function Controls({
 
   return (
     <section className="controls-shell">
+      <div className="controls-header">
+        <h1 className="controls-title">BST Controls</h1>
+        <button className="btn btn-ghost" onClick={onToggleTrace}>
+          {isTraceOpen ? 'Hide Trace' : 'Show Trace'}
+        </button>
+      </div>
+
       <div className="controls-grid">
-        <div className="controls-row">
-          <label htmlFor="value-input" className="control-label">
-            Value
-          </label>
+        <div className="control-block">
+          <span className="control-label">Value Input</span>
           <input
             id="value-input"
             className="value-input"
@@ -84,48 +93,55 @@ export function Controls({
             }}
             placeholder="e.g. 42"
           />
-          <button className="btn btn-primary" onClick={() => runValueAction(onInsert)}>
-            Insert
-          </button>
-          <button className="btn btn-secondary" onClick={() => runValueAction(onSearch)}>
-            Search
-          </button>
-          <button className="btn btn-danger" onClick={() => runValueAction(onDelete)}>
-            Delete
-          </button>
-          <button className="btn btn-ghost" onClick={onClear}>
-            Clear
-          </button>
+          <div className="control-actions">
+            <button className="btn btn-primary" onClick={() => runValueAction(onInsert)}>
+              Insert
+            </button>
+            <button className="btn btn-secondary" onClick={() => runValueAction(onSearch)}>
+              Search
+            </button>
+            <button className="btn btn-danger" onClick={() => runValueAction(onDelete)}>
+              Delete
+            </button>
+            <button className="btn btn-ghost" onClick={onClear}>
+              Clear Tree
+            </button>
+          </div>
         </div>
 
-        <div className="controls-row">
+        <div className="control-block">
           <span className="control-label">Traversals</span>
-          <button className="btn btn-secondary" onClick={onInorder}>
-            Inorder
-          </button>
-          <button className="btn btn-secondary" onClick={onPreorder}>
-            Preorder
-          </button>
-          <button className="btn btn-secondary" onClick={onPostorder}>
-            Postorder
-          </button>
+          <div className="control-actions">
+            <button className="btn btn-secondary" onClick={onInorder}>
+              Inorder
+            </button>
+            <button className="btn btn-secondary" onClick={onPreorder}>
+              Preorder
+            </button>
+            <button className="btn btn-secondary" onClick={onPostorder}>
+              Postorder
+            </button>
+          </div>
         </div>
 
-        <div className="controls-row playback-row">
+        <div className="control-block playback-row">
           <span className="control-label">Playback</span>
-          <button className="btn btn-ghost" onClick={onResetPlayback}>
-            Reset
-          </button>
-          <button className="btn btn-ghost" onClick={onStepBackward}>
-            Back
-          </button>
-          <button className="btn btn-primary" onClick={onPlayPause}>
-            {status === 'playing' ? 'Pause' : 'Play'}
-          </button>
-          <button className="btn btn-ghost" onClick={onStepForward}>
-            Next
-          </button>
-          <label htmlFor="speed-slider" className="control-label speed-label">
+          <div className="control-actions">
+            <button className="btn btn-ghost" onClick={onResetPlayback}>
+              Reset
+            </button>
+            <button className="btn btn-ghost" onClick={onStepBackward}>
+              Back
+            </button>
+            <button className="btn btn-primary" onClick={onPlayPause}>
+              {status === 'playing' ? 'Pause' : 'Play'}
+            </button>
+            <button className="btn btn-ghost" onClick={onStepForward}>
+              Next
+            </button>
+          </div>
+
+          <label htmlFor="speed-slider" className="control-label">
             Speed
           </label>
           <input
@@ -138,10 +154,10 @@ export function Controls({
             value={speedMs}
             onChange={(event) => onSpeedChange(Number.parseInt(event.target.value, 10))}
           />
-          <span className="speed-value">{speedMs}ms</span>
+          <span className="speed-value">{speedMs} ms</span>
         </div>
 
-        <div className="controls-row">
+        <div className="control-block">
           <label htmlFor="timeline-slider" className="control-label">
             Timeline
           </label>
