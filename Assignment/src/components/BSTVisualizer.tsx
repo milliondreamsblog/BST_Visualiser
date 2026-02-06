@@ -65,6 +65,7 @@ export function BSTVisualizer() {
             activeNodeIds={visualizer.activeNodeIds}
             activeEdge={visualizer.activeEdge}
             currentKind={visualizer.currentKind}
+            motionMs={Math.max(280, Math.round(visualizer.speedMs * 0.62))}
           />
 
           <TracePanel
@@ -82,6 +83,7 @@ export function BSTVisualizer() {
             currentStep={visualizer.currentStep}
             steps={visualizer.steps}
             currentMessage={visualizer.currentMessage}
+            currentKind={visualizer.currentKind}
             onSpeedChange={visualizer.setSpeedMs}
             onInsert={visualizer.insert}
             onSearch={visualizer.search}

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import type { PlaybackStatus, TraceStep } from '../animation/traceTypes'
+import type { PlaybackStatus, TraceStep, TraceStepKind } from '../animation/traceTypes'
 
 interface ControlsProps {
   status: PlaybackStatus
@@ -7,6 +7,7 @@ interface ControlsProps {
   currentStep: number
   steps: TraceStep[]
   currentMessage: string
+  currentKind: TraceStepKind | null
   onSpeedChange: (value: number) => void
   onInsert: (value: number) => void
   onSearch: (value: number) => void
@@ -29,12 +30,55 @@ function asInt(value: string): number | null {
   return Number.isNaN(parsed) ? null : parsed
 }
 
+function getLessonCopy(kind: TraceStepKind | null): { title: string; description: string } {
+  if (kind === 'visit' || kind === 'compare') {
+    return {
+      title: 'Path Decision',
+      description: 'Compare target with current node and choose left or right subtree.',
+    }
+  }
+
+  if (kind === 'insert') {
+    return {
+      title: 'Insertion Rule',
+      description: 'A new value is attached at the first null position on the valid branch.',
+    }
+  }
+
+  if (kind === 'delete' || kind === 'replace') {
+    return {
+      title: 'Deletion Strategy',
+      description: 'Delete handles 3 cases: leaf, one child, or successor replacement.',
+    }
+  }
+
+  if (kind === 'found') {
+    return {
+      title: 'Search Success',
+      description: 'Exact match reached. BST search stops immediately.',
+    }
+  }
+
+  if (kind === 'traversal') {
+    return {
+      title: 'Traversal Walk',
+      description: 'Traversal order controls visit timing, not tree structure.',
+    }
+  }
+
+  return {
+    title: 'BST Learning Mode',
+    description: 'Run operations to observe decision paths and structural changes step by step.',
+  }
+}
+
 export function Controls({
   status,
   speedMs,
   currentStep,
   steps,
   currentMessage,
+  currentKind,
   onSpeedChange,
   onInsert,
   onSearch,
@@ -58,6 +102,8 @@ export function Controls({
     () => (steps.length === 0 || currentStep < 0 ? 0 : currentStep + 1),
     [currentStep, steps.length]
   )
+  const completion = steps.length > 0 ? Math.round((stepNumber / steps.length) * 100) : 0
+  const lesson = getLessonCopy(currentKind)
 
   const runValueAction = (action: (value: number) => void): void => {
     const value = asInt(inputValue)
@@ -70,6 +116,16 @@ export function Controls({
 
   return (
     <section className="controls-shell">
+      <div className="learning-card">
+        <span className="learning-kicker">Learning Platform</span>
+        <h2 className="learning-title">{lesson.title}</h2>
+        <p className="learning-description">{lesson.description}</p>
+        <div className="learning-stats">
+          <span className="status-pill">Status: {status}</span>
+          <span className="status-pill">Progress: {completion}%</span>
+        </div>
+      </div>
+
       <div className="controls-header">
         <h1 className="controls-title">BST Controls</h1>
         <button className="btn btn-ghost" onClick={onToggleTrace}>
@@ -174,6 +230,28 @@ export function Controls({
           <span className="timeline-value">
             {stepNumber} / {steps.length}
           </span>
+        </div>
+
+        <div className="control-block">
+          <span className="control-label">Legend</span>
+          <div className="legend-list">
+            <div className="legend-item">
+              <span className="legend-dot legend-active" />
+              <span>Current comparison or visit</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-dot legend-found" />
+              <span>Search success</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-dot legend-insert" />
+              <span>Inserted node</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-dot legend-delete" />
+              <span>Delete or replace action</span>
+            </div>
+          </div>
         </div>
       </div>
 

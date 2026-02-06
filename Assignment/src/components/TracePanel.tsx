@@ -33,6 +33,7 @@ export function TracePanel({ steps, currentStep, isOpen, onClose }: TracePanelPr
               </li>
             )
           })}
+          {steps.length === 0 ? <li className="trace-empty">No trace yet. Run an operation.</li> : null}
         </ol>
       </aside>
     </div>

@@ -1,10 +1,13 @@
 import type { TraceStepKind } from '../animation/traceTypes'
 import type { LayoutNode } from '../layout/calculateLayout'
 
+export type NodeMotionState = 'stable' | 'enter' | 'exit'
+
 interface NodeProps {
   node: LayoutNode
   currentKind: TraceStepKind | null
   isActive: boolean
+  motionState?: NodeMotionState
 }
 
 function resolveNodeClass(currentKind: TraceStepKind | null, isActive: boolean): string {
@@ -27,10 +30,25 @@ function resolveNodeClass(currentKind: TraceStepKind | null, isActive: boolean):
   return 'bst-node bst-node-active'
 }
 
-export function Node({ node, currentKind, isActive }: NodeProps) {
+function resolveMotionClass(motionState: NodeMotionState): string {
+  if (motionState === 'enter') {
+    return 'bst-node-motion-enter'
+  }
+
+  if (motionState === 'exit') {
+    return 'bst-node-motion-exit'
+  }
+
+  return ''
+}
+
+export function Node({ node, currentKind, isActive, motionState = 'stable' }: NodeProps) {
+  const stateClass = resolveNodeClass(currentKind, isActive)
+  const motionClass = resolveMotionClass(motionState)
+
   return (
     <div
-      className={resolveNodeClass(currentKind, isActive)}
+      className={`${stateClass} ${motionClass}`.trim()}
       style={{
         transform: `translate(${node.x}px, ${node.y}px)`,
       }}
